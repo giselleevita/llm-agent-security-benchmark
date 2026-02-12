@@ -2,7 +2,7 @@
 
 Date: 2026-02-12
 Reviewer role: Senior Security Engineer + Backend Architect
-Scope: `/Users/yusaf/Desktop/gigi uni/llm-agent-security-benchmark` only
+Scope: repository root (`llm-agent-security-benchmark`) only
 
 ## Phase A - Recovery and grounding
 
