@@ -121,6 +121,49 @@ If any threshold is violated (e.g., Leakage > 0 or ASR > max_asr), the workflow 
 
 ---
 
+## Why this matters
+- Enterprise agents need enforcement outside the model; this project demonstrates a policy-first execution boundary.
+- Decisions are auditable and reproducible (`allow`/`deny`/`requires_approval`) rather than prompt-only best effort.
+- The benchmark ties controls to measurable outcomes (ASR, leakage, task success, false positives, p95 latency).
+- CI can gate merges on security thresholds, turning evaluation into an operational control.
+
+---
+
+## Results
+
+### Latest local rerun (this host, runs=1)
+
+| Baseline | ASR | Leakage | Task Success | False Positives | p95 latency (ms) |
+|---|---:|---:|---:|---:|---:|
+| B0 | 0.5417 | 0.1200 | 0.4800 | 0.0000 | 0.13 |
+| B1 | 0.5417 | 0.1200 | 0.4800 | 0.0000 | 0.14 |
+| B2 | 0.2708 | 0.0000 | 0.7400 | 0.0000 | 0.10 |
+
+Notes:
+- B3 could not be rerun on this host because OPA is unavailable (`http://localhost:8181` connection refused).
+- Reproduce with Docker/OPA available using the commands in `Makefile`.
+
+---
+
+## Architecture (Mermaid)
+
+```mermaid
+flowchart LR
+  U["User Task / Scenario"] --> O["Agent Orchestrator"]
+  O -->|ToolCallRequest| G["Tool Gateway (PEP)"]
+  G -->|Policy input| P["OPA (PDP)"]
+  P -->|allow/deny/approval| G
+  G -->|allowed only| T["Tool Registry + Mocks"]
+  T --> G
+  G --> A["Audit JSONL"]
+  O --> R["Final Output + Trace"]
+  B["Benchmark Runner"] --> O
+  B --> S["summary.json / run.json"]
+  CI["CI Gate"] --> S
+```
+
+---
+
 ## Ethics & safety
 - No real secrets or personal data: uses synthetic canary tokens.
 - Defensive focus: evaluates mitigations and enforcement (no “attack kit”).
