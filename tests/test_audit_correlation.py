@@ -32,6 +32,7 @@ def test_audit_includes_correlation_id(tmp_path: Path) -> None:
             "baseline": "B3",
             "scenario_id": "TEST-CORR",
             "step": 1,
+            "request_id": "req-test-123",
             "correlation_id": "run-test-123",
             "taint": {"from_user": True, "from_retrieved": False, "contains_canary": False},
             "ablation": {},
@@ -43,6 +44,9 @@ def test_audit_includes_correlation_id(tmp_path: Path) -> None:
     lines = audit_path.read_text(encoding="utf-8").strip().splitlines()
     assert lines, "expected one audit event"
     event = json.loads(lines[-1])
+    assert event["request_id"] == "req-test-123"
     assert event["correlation_id"] == "run-test-123"
     assert event["scenario_id"] == "TEST-CORR"
     assert event["decision"] == "allowed"
+    assert "policy_version" in event
+    assert "policy_hash" in event

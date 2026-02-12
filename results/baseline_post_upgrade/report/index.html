@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LLM Agent Security Benchmark Report</title>
+  <style>
+    :root { --bg:#f5f7fa; --card:#ffffff; --ink:#17202a; --muted:#5d6d7e; --accent:#0b6e4f; --border:#d6dbdf; }
+    body { margin:0; font-family: "IBM Plex Sans", "Segoe UI", sans-serif; background:var(--bg); color:var(--ink); }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 24px; }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px; margin-bottom:16px; }
+    h1, h2 { margin: 0 0 10px 0; }
+    h1 { color: var(--accent); }
+    table { width:100%; border-collapse: collapse; font-size: 14px; }
+    th, td { border:1px solid var(--border); padding:8px 10px; text-align:left; }
+    th { background:#eef2f7; }
+    .grid { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+    .chart img { width:100%; border:1px solid var(--border); border-radius:8px; background:#fff; }
+    .meta { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:8px; font-size:13px; color:var(--muted); }
+    @media (max-width: 860px){ .grid, .meta{ grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>LLM Agent Security Benchmark Report</h1>
+      <p>Enterprise benchmark output for policy-enforced LLM agent tool runtime.</p>
+      <div class="meta">
+        <div><strong>Commit:</strong> 02465cbc7c2a330302aaf2fc1c6265eb07536323</div>
+        <div><strong>Timestamp:</strong> 2026-02-12T11:57:46.369140+00:00</div>
+        <div><strong>Platform:</strong> macOS-26.2-arm64-arm-64bit-Mach-O</div>
+        <div><strong>Python:</strong> 3.14.2</div>
+        <div><strong>Seed:</strong> 1</div>
+        <div><strong>Policy hash:</strong> 7e42984cc5b391e48d6abebc09cb150b394684770a6dec4212bee1f3bb008c14</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Baseline/Experiment Summary</h2>
+      <table>
+        <thead><tr><th>Experiment</th><th>ASR</th><th>Leakage</th><th>TaskSuccess</th><th>FalsePos</th><th>p95(ms)</th><th>Runs</th></tr></thead>
+        <tbody>
+        
+          <tr><td>B0</td><td>0.542</td><td>0.120</td><td>0.480</td><td>0.000</td><td>0</td><td>250</td></tr>
+        
+          <tr><td>B1</td><td>0.542</td><td>0.120</td><td>0.480</td><td>0.000</td><td>0</td><td>250</td></tr>
+        
+          <tr><td>B2</td><td>0.271</td><td>0.000</td><td>0.740</td><td>0.000</td><td>0</td><td>250</td></tr>
+        
+          <tr><td>B3</td><td>0.000</td><td>0.000</td><td>0.980</td><td>0.000</td><td>10</td><td>250</td></tr>
+        
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Threat Breakdown</h2>
+      <table>
+        <thead><tr><th>Threat/Category</th><th>ASR</th><th>Leakage</th><th>TaskSuccess</th></tr></thead>
+        <tbody>
+        
+          <tr><td>direct_injection</td><td>0.000</td><td>0.000</td><td>1.000</td></tr>
+        
+          <tr><td>excessive_agency</td><td>0.000</td><td>0.000</td><td>1.000</td></tr>
+        
+          <tr><td>exfiltration</td><td>0.000</td><td>0.000</td><td>0.875</td></tr>
+        
+          <tr><td>indirect_injection</td><td>0.000</td><td>0.000</td><td>1.000</td></tr>
+        
+          <tr><td>tool_misuse</td><td>0.000</td><td>0.000</td><td>1.000</td></tr>
+        
+        </tbody>
+      </table>
+    </div>
+
+    <div class="grid">
+      
+      <div class="card chart">
+        <h2>asr_comparison.png</h2>
+        <img src="asr_comparison.png" alt="asr_comparison.png" />
+      </div>
+      
+      <div class="card chart">
+        <h2>leakage_comparison.png</h2>
+        <img src="leakage_comparison.png" alt="leakage_comparison.png" />
+      </div>
+      
+      <div class="card chart">
+        <h2>false_positive_comparison.png</h2>
+        <img src="false_positive_comparison.png" alt="false_positive_comparison.png" />
+      </div>
+      
+      <div class="card chart">
+        <h2>p95_latency_comparison.png</h2>
+        <img src="p95_latency_comparison.png" alt="p95_latency_comparison.png" />
+      </div>
+      
+      <div class="card chart">
+        <h2>task_success_comparison.png</h2>
+        <img src="task_success_comparison.png" alt="task_success_comparison.png" />
+      </div>
+      
+    </div>
+  </div>
+</body>
+</html>

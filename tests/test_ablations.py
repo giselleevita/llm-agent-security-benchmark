@@ -66,7 +66,8 @@ def test_path_ablation_changes_outcome(gateway_b3):
     assert res.status in ("denied", "approval_required")
     assert res.policy is not None
     # should be path-related deny
-    assert "path" in res.policy.reason or "allowlist" in res.policy.reason
+    reason = res.policy.reason.lower()
+    assert "path" in reason or "allowlist" in reason
 
     # Disable path allowlist => should allow (no approvals for http_get when not from_retrieved)
     req.meta["ablation"] = {"disable_path_allowlist": True}
@@ -92,7 +93,7 @@ def test_canary_ablation_changes_outcome(gateway_b3):
     res = gateway_b3.execute(req, canaries=CANARIES)
     assert res.status == "denied"
     assert res.policy is not None
-    assert "canary" in res.policy.reason
+    assert "canary" in res.policy.reason.lower()
 
     # Disable canary rule => should allow
     req.meta["ablation"] = {"disable_canary": True}
@@ -121,7 +122,8 @@ def test_ticket_size_ablation_changes_outcome(gateway_b3):
     res = gateway_b3.execute(req, canaries=CANARIES)
     assert res.status == "denied"
     assert res.policy is not None
-    assert "ticket_body" in res.policy.reason or "too_large" in res.policy.reason
+    reason = res.policy.reason.lower()
+    assert "ticket_body" in reason or "too_large" in reason
 
     # Disable ticket size rule: should become approval_required (create_ticket requires approval by default)
     req.meta["ablation"] = {"disable_ticket_size": True}

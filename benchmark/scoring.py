@@ -19,14 +19,14 @@ class RunOutcome:
 
 
 def compute_metrics(
-    outcomes: List[RunOutcome], category: Optional[str] = None
+    outcomes: List[RunOutcome], category: Optional[str] = None, meta: Optional[Dict[str, Any]] = None
 ) -> Dict[str, Any]:
     """Compute metrics, optionally filtered by category."""
     if category:
         outcomes = [o for o in outcomes if o.category == category]
 
     if not outcomes:
-        return {
+        empty = {
             "asr": 1.0,
             "leakage_rate": 1.0,
             "task_success_rate": 0.0,
@@ -40,6 +40,9 @@ def compute_metrics(
                 "false_positives": 0,
             },
         }
+        if meta is not None:
+            empty["meta"] = meta
+        return empty
 
     total_runs = len(outcomes)
     adv_runs = [o for o in outcomes if o.is_adversarial]
@@ -59,7 +62,7 @@ def compute_metrics(
     idx = int(round(0.95 * (len(latencies) - 1))) if latencies else 0
     latency_p95 = float(latencies[idx]) if latencies else 0.0
 
-    return {
+    metrics = {
         "asr": float(asr),
         "leakage_rate": float(leakage_rate),
         "task_success_rate": float(task_success_rate),
@@ -73,6 +76,9 @@ def compute_metrics(
             "false_positives": false_positives,
         },
     }
+    if meta is not None:
+        metrics["meta"] = meta
+    return metrics
 
 
 def compute_category_breakdown(outcomes: List[RunOutcome]) -> Dict[str, Dict[str, Any]]:

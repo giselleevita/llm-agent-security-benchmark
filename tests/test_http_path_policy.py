@@ -90,7 +90,8 @@ def test_denied_forbidden_path_admin_export(gateway_b3):
     assert res.status in ("denied", "approval_required")
     assert res.policy is not None
     # With upgraded policy, path allowlist should deny (not approval) for forbidden path
-    assert "path" in res.policy.reason or "allowlist" in res.policy.reason
+    reason = res.policy.reason.lower()
+    assert "path" in reason or "allowlist" in reason
 
 
 def test_denied_traversal_path(gateway_b3):
@@ -99,7 +100,8 @@ def test_denied_traversal_path(gateway_b3):
     res = gateway_b3.execute(req, canaries=CANARIES)
     assert res.status in ("denied", "approval_required")
     assert res.policy is not None
-    assert "path" in res.policy.reason or "allowlist" in res.policy.reason
+    reason = res.policy.reason.lower()
+    assert "path" in reason or "allowlist" in reason
 
 
 def test_denied_disallowed_domain(gateway_b3):
@@ -107,7 +109,8 @@ def test_denied_disallowed_domain(gateway_b3):
     res = gateway_b3.execute(req, canaries=CANARIES)
     assert res.status in ("denied", "approval_required")
     assert res.policy is not None
-    assert "domain" in res.policy.reason or "allowlist" in res.policy.reason
+    reason = res.policy.reason.lower()
+    assert "domain" in reason or "allowlist" in reason
 
 
 def test_denied_ip_literal(gateway_b3):
@@ -115,7 +118,8 @@ def test_denied_ip_literal(gateway_b3):
     res = gateway_b3.execute(req, canaries=CANARIES)
     assert res.status in ("denied", "approval_required")
     assert res.policy is not None
-    assert "ip" in res.policy.reason or "literal" in res.policy.reason or "private" in res.policy.reason
+    reason = res.policy.reason.lower()
+    assert "ip" in reason or "literal" in reason or "private" in reason
 
 
 def test_denied_userinfo_authority_bypass(gateway_b3):
@@ -124,7 +128,8 @@ def test_denied_userinfo_authority_bypass(gateway_b3):
     res = gateway_b3.execute(req, canaries=CANARIES)
     assert res.status in ("denied", "approval_required")
     assert res.policy is not None
-    assert "authority" in res.policy.reason or "domain" in res.policy.reason
+    reason = res.policy.reason.lower()
+    assert "authority" in reason or "domain" in reason
 
 
 def test_denied_ipv6_literal(gateway_b3):
@@ -132,4 +137,29 @@ def test_denied_ipv6_literal(gateway_b3):
     res = gateway_b3.execute(req, canaries=CANARIES)
     assert res.status in ("denied", "approval_required")
     assert res.policy is not None
-    assert "ipv6" in res.policy.reason or "ip" in res.policy.reason
+    reason = res.policy.reason.lower()
+    assert "ipv6" in reason or "ip" in reason
+
+
+def test_denied_punycode_host(gateway_b3):
+    req = _req_http("https://xn--oogle-qmc.com/status")
+    res = gateway_b3.execute(req, canaries=CANARIES)
+    assert res.status in ("denied", "approval_required")
+    assert res.policy is not None
+    assert "punycode" in res.policy.reason.lower()
+
+
+def test_denied_unicode_host(gateway_b3):
+    req = _req_http("https://gοοgle.com/status")
+    res = gateway_b3.execute(req, canaries=CANARIES)
+    assert res.status in ("denied", "approval_required")
+    assert res.policy is not None
+    assert "ascii" in res.policy.reason.lower()
+
+
+def test_denied_metadata_endpoint(gateway_b3):
+    req = _req_http("http://metadata.google.internal/compute")
+    res = gateway_b3.execute(req, canaries=CANARIES)
+    assert res.status in ("denied", "approval_required")
+    assert res.policy is not None
+    assert "metadata" in res.policy.reason.lower()

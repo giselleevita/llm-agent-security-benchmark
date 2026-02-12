@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, Optional, List
+from typing import Any, Callable, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -58,6 +58,7 @@ class ReadDocArgs(BaseModel):
 
 class HttpGetArgs(BaseModel):
     url: str
+    follow_redirects: bool = False
 
 
 class CreateTicketArgs(BaseModel):
@@ -83,8 +84,9 @@ class ToolRegistry:
         self.http = http
         self.tickets = tickets
 
-        self.allowed_domains: List[str] = ["api.company.tld", "docs.company.tld"]
+        self._allowed_domains: List[str] = ["api.company.tld", "docs.company.tld"]
         self.allowed_ticket_projects: List[str] = ["SEC", "IT"]
+        self._sync_http_allowed_domains()
 
         self._tools: Dict[str, ToolDef] = {
             "search_docs": ToolDef("search_docs", SearchDocsArgs, self._exec_search_docs),
@@ -96,6 +98,19 @@ class ToolRegistry:
 
     def get(self, name: str) -> Optional[ToolDef]:
         return self._tools.get(name)
+
+    @property
+    def allowed_domains(self) -> List[str]:
+        return self._allowed_domains
+
+    @allowed_domains.setter
+    def allowed_domains(self, value: List[str]) -> None:
+        self._allowed_domains = list(value)
+        self._sync_http_allowed_domains()
+
+    def _sync_http_allowed_domains(self) -> None:
+        if hasattr(self.http, "allowed_domains"):
+            setattr(self.http, "allowed_domains", list(self._allowed_domains))
 
     def _exec_search_docs(self, args: SearchDocsArgs) -> Dict[str, Any]:
         return self.docs.search(args.query)

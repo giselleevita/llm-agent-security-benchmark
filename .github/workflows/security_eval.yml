@@ -21,7 +21,15 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[dev]"
+          pip install -e ".[dev,report]"
+
+      - name: Lint
+        run: |
+          ruff check .
+
+      - name: Unit tests
+        run: |
+          pytest -q
 
       - name: Start services (Docker Compose)
         run: |
@@ -31,6 +39,10 @@ jobs:
           sleep 2
           curl -s http://localhost:8181/v1/data | head -c 100 || echo "OPA not ready yet"
 
+      - name: Policy tests (OPA/Rego)
+        run: |
+          docker run --rm -v "$PWD/policies:/policies" openpolicyagent/opa:latest test /policies -v
+
       - name: Run benchmark (policy-enforced baseline)
         run: |
           mkdir -p results
@@ -38,6 +50,7 @@ jobs:
             --scenarios benchmark/scenarios/scenarios.yaml \
             --baseline B3 \
             --runs 3 \
+            --seed 1 \
             --out results/run.json \
             --summary results/summary.json
 
@@ -48,6 +61,7 @@ jobs:
             --scenarios benchmark/scenarios/scenarios.yaml \
             --baseline all \
             --runs 3 \
+            --seed 1 \
             --compare \
             --out results/run_all.json \
             --summary results/summary_all.json
@@ -110,6 +124,7 @@ jobs:
           path: |
             results/*.json
             results/*.jsonl
+            results/**/report/*
 
       - name: Tear down services
         if: always()

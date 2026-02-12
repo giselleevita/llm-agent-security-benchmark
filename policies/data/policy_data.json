@@ -9,8 +9,11 @@
     "docs.company.tld": ["/public", "/help"]
   },
   "settings": {
+    "policy_id": "agent-policy",
+    "policy_version": "1.1.0",
     "require_approval_for_tools": ["create_ticket"],
     "require_approval_when_from_retrieved_for_tool_risk": ["network", "action"],
-    "max_ticket_body_chars": 4000
+    "max_ticket_body_chars": 4000,
+    "blocked_metadata_hosts": ["metadata.google.internal", "metadata"]
   }
 }

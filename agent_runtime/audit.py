@@ -19,5 +19,7 @@ class AuditLogger:
     def emit(self, event: Dict[str, Any]) -> None:
         event = dict(event)
         event.setdefault("ts", time.time())
+        event.setdefault("event_type", "tool_policy_decision")
+        event.setdefault("schema_version", "1.0")
         with self.path.open("a", encoding="utf-8") as f:
             f.write(json.dumps(event, ensure_ascii=False) + "\n")
