@@ -15,7 +15,7 @@ The core idea is to treat the LLM as **untrusted**: the model can *suggest* acti
 
 ## Key security controls
 1. **Tool allowlisting** — the agent can only call registered tools.
-2. **Parameter constraints** — e.g., HTTP only to allowlisted domains; tickets only in allowed projects.
+2. **Parameter constraints** — e.g., HTTP only to allowlisted domains/paths with URL-authority checks; tickets only in allowed projects.
 3. **Data boundaries / leakage prevention** — canary token policies prevent exfiltration.
 4. **Approval flow** — high-risk actions can require explicit external approval.
 5. **Audit trace** — every tool request/decision is logged with rationale and a `correlation_id`.

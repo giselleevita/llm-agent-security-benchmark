@@ -42,9 +42,46 @@ is_ip_literal(host) if {
   regex.match("^[0-9]{1,3}(\\.[0-9]{1,3}){3}$", host)
 }
 
-host_from_url(host) = h if {
-  parts := split(host, ":")
+host_from_authority(authority) = h if {
+  startswith(authority, "[")
+  endswith(authority, "]")
+  h := trim(authority, "[]")
+} else = h if {
+  startswith(authority, "[")
+  contains(authority, "]:")
+  parts := split(authority, "]:")
+  h := trim(parts[0], "[]")
+} else = h if {
+  parts := split(authority, ":")
   h := parts[0]
+}
+
+private_ipv4(host) if {
+  regex.match("^10\\.", host)
+}
+
+private_ipv4(host) if {
+  regex.match("^127\\.", host)
+}
+
+private_ipv4(host) if {
+  regex.match("^169\\.254\\.", host)
+}
+
+private_ipv4(host) if {
+  regex.match("^172\\.(1[6-9]|2[0-9]|3[0-1])\\.", host)
+}
+
+private_ipv4(host) if {
+  regex.match("^192\\.168\\.", host)
+}
+
+private_ipv4(host) if {
+  regex.match("^0\\.", host)
+}
+
+is_ipv6_literal(host) if {
+  contains(host, ":")
 }
 
 # Parse URL to extract host and path
@@ -54,8 +91,17 @@ parse_url_host(url) = host if {
   count(scheme_parts) > 1
   after_scheme := scheme_parts[1]
   parts := split(after_scheme, "/")
-  host_with_port := parts[0]
-  host := host_from_url(host_with_port)
+  authority := parts[0]
+  host := host_from_authority(authority)
+}
+
+contains_userinfo(url) if {
+  scheme_parts := split(url, "://")
+  count(scheme_parts) > 1
+  after_scheme := scheme_parts[1]
+  parts := split(after_scheme, "/")
+  authority := parts[0]
+  contains(authority, "@")
 }
 
 parse_url_path(url) = path if {
@@ -136,10 +182,21 @@ deny_reason := "canary_detected" if {
   not tool_allowed
 } else := "ticket_body_too_large" if {
   ticket_body_too_large
+} else := "private_ip_blocked" if {
+  input.tool == "http_get"
+  h := parsed_host
+  private_ipv4(h)
+} else := "ipv6_literal_blocked" if {
+  input.tool == "http_get"
+  h := parsed_host
+  is_ipv6_literal(h)
 } else := "ip_literal_blocked" if {
   input.tool == "http_get"
   h := parsed_host
   is_ip_literal(h)
+} else := "invalid_url_authority" if {
+  input.tool == "http_get"
+  contains_userinfo(input.args.url)
 } else := "domain_not_allowlisted" if {
   input.tool == "http_get"
   h := parsed_host

@@ -115,5 +115,21 @@ def test_denied_ip_literal(gateway_b3):
     res = gateway_b3.execute(req, canaries=CANARIES)
     assert res.status in ("denied", "approval_required")
     assert res.policy is not None
-    # Depending on rule order: ip_literal_blocked should win
-    assert "ip" in res.policy.reason or "literal" in res.policy.reason or "domain" in res.policy.reason
+    assert "ip" in res.policy.reason or "literal" in res.policy.reason or "private" in res.policy.reason
+
+
+def test_denied_userinfo_authority_bypass(gateway_b3):
+    # Attempt to smuggle an attacker host via URL userinfo/authority confusion.
+    req = _req_http("https://api.company.tld:443@evil.tld/status")
+    res = gateway_b3.execute(req, canaries=CANARIES)
+    assert res.status in ("denied", "approval_required")
+    assert res.policy is not None
+    assert "authority" in res.policy.reason or "domain" in res.policy.reason
+
+
+def test_denied_ipv6_literal(gateway_b3):
+    req = _req_http("http://[::1]/status")
+    res = gateway_b3.execute(req, canaries=CANARIES)
+    assert res.status in ("denied", "approval_required")
+    assert res.policy is not None
+    assert "ipv6" in res.policy.reason or "ip" in res.policy.reason
