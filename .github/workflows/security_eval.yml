@@ -1,0 +1,117 @@
+name: Security Evaluation Gate
+
+on:
+  pull_request:
+  push:
+    branches: ["main", "master"]
+
+jobs:
+  security-eval:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Start services (Docker Compose)
+        run: |
+          docker compose up -d
+          docker compose ps
+          # Wait for OPA to be ready
+          sleep 2
+          curl -s http://localhost:8181/v1/data | head -c 100 || echo "OPA not ready yet"
+
+      - name: Run benchmark (policy-enforced baseline)
+        run: |
+          mkdir -p results
+          python -m benchmark.runner \
+            --scenarios benchmark/scenarios/scenarios.yaml \
+            --baseline B3 \
+            --runs 3 \
+            --out results/run.json \
+            --summary results/summary.json
+
+      - name: Run baseline comparison (on main/master)
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        run: |
+          python -m benchmark.runner \
+            --scenarios benchmark/scenarios/scenarios.yaml \
+            --baseline all \
+            --runs 3 \
+            --compare \
+            --out results/run_all.json \
+            --summary results/summary_all.json
+
+      - name: Evaluate thresholds (fail on regression)
+        run: |
+          python - << 'PY'
+          import json, sys
+          import yaml
+
+          thresholds_path = "ci/thresholds.yaml"
+          summary_path = "results/summary.json"
+
+          with open(thresholds_path, "r", encoding="utf-8") as f:
+            cfg = yaml.safe_load(f)
+
+          with open(summary_path, "r", encoding="utf-8") as f:
+            s = json.load(f)
+
+          th = cfg["thresholds"]
+
+          asr = float(s.get("asr", 1.0))
+          leakage = float(s.get("leakage_rate", 1.0))
+          tsr = float(s.get("task_success_rate", 0.0))
+          fpr = float(s.get("false_positive_rate", 1.0))
+          p95 = float(s.get("latency_ms_p95", 1e12))
+
+          errors = []
+
+          if asr > th["max_asr"]:
+            errors.append(f"ASR too high: {asr:.4f} > {th['max_asr']:.4f}")
+          if leakage > th["max_leakage"]:
+            errors.append(f"Leakage too high: {leakage:.4f} > {th['max_leakage']:.4f}")
+          if tsr < th["min_task_success"]:
+            errors.append(f"Task success too low: {tsr:.4f} < {th['min_task_success']:.4f}")
+          if fpr > th["max_false_positive"]:
+            errors.append(f"False positives too high: {fpr:.4f} > {th['max_false_positive']:.4f}")
+          if "max_p95_latency_ms" in th and p95 > th["max_p95_latency_ms"]:
+            errors.append(f"Latency p95 too high: {p95:.0f}ms > {th['max_p95_latency_ms']:.0f}ms")
+
+          if errors:
+            print("❌ Security gate FAILED:")
+            for e in errors:
+              print("  -", e)
+            sys.exit(1)
+
+          print("✅ Security gate PASSED")
+          print(f"  ASR: {asr:.4f} (threshold: {th['max_asr']:.4f})")
+          print(f"  Leakage: {leakage:.4f} (threshold: {th['max_leakage']:.4f})")
+          print(f"  Task Success: {tsr:.4f} (threshold: {th['min_task_success']:.4f})")
+          print(f"  False Positives: {fpr:.4f} (threshold: {th['max_false_positive']:.4f})")
+          print(f"  P95 Latency: {p95:.0f}ms (threshold: {th['max_p95_latency_ms']:.0f}ms)")
+          PY
+
+      - name: Upload artifacts (reports)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-eval-results
+          path: |
+            results/*.json
+            results/*.jsonl
+
+      - name: Tear down services
+        if: always()
+        run: |
+          docker compose down -v
