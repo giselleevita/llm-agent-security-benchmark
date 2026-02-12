@@ -18,7 +18,7 @@ The core idea is to treat the LLM as **untrusted**: the model can *suggest* acti
 2. **Parameter constraints** — e.g., HTTP only to allowlisted domains; tickets only in allowed projects.
 3. **Data boundaries / leakage prevention** — canary token policies prevent exfiltration.
 4. **Approval flow** — high-risk actions can require explicit external approval.
-5. **Audit trace** — every tool request/decision is logged with rationale.
+5. **Audit trace** — every tool request/decision is logged with rationale and a `correlation_id`.
 
 ---
 

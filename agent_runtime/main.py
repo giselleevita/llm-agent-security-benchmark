@@ -47,4 +47,5 @@ def run(req: RunRequest) -> Dict[str, Any]:
         "final_output": result.final_output,
         "tool_trace": result.tool_trace,
         "latency_ms": result.latency_ms,
+        "correlation_id": result.correlation_id,
     }

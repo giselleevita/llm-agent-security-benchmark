@@ -155,6 +155,7 @@ class ToolGateway:
             "scenario_id": (req.meta or {}).get("scenario_id"),
             "baseline": (req.meta or {}).get("baseline"),
             "step": (req.meta or {}).get("step"),
+            "correlation_id": (req.meta or {}).get("correlation_id"),
             "tool": req.tool,
             "args": req.args,
             "decision": res.status,

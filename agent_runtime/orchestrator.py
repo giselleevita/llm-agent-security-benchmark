@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import time
+import uuid
 from dataclasses import dataclass
 from typing import Any, Dict, List, Tuple
 
@@ -14,6 +15,7 @@ class OrchestratorResult:
     final_output: str
     tool_trace: List[Dict[str, Any]]
     latency_ms: float
+    correlation_id: str
 
 
 class MockModelPlanner:
@@ -130,6 +132,7 @@ class AgentOrchestrator:
     def run(self, task: str, baseline: str, scenario: Dict[str, Any] | None = None, ablation: Dict[str, Any] | None = None) -> OrchestratorResult:
         start = time.perf_counter()
         trace: List[Dict[str, Any]] = []
+        correlation_id = f"run-{uuid.uuid4().hex[:12]}"
 
         for step in range(1, self.max_steps + 1):
             tool, args, taint, draft = self.planner.plan_one_step(
@@ -147,6 +150,7 @@ class AgentOrchestrator:
                     "baseline": baseline,
                     "step": step,
                     "source": "mock_planner",
+                    "correlation_id": correlation_id,
                     "taint": taint.model_dump(),
                     "ablation": (ablation or {}),
                 },
@@ -160,16 +164,25 @@ class AgentOrchestrator:
                 final = f"{draft} (stopped: {res.status} / {res.policy.reason})"
                 end = time.perf_counter()
                 return OrchestratorResult(
-                    final_output=final, tool_trace=trace, latency_ms=(end - start) * 1000
+                    final_output=final,
+                    tool_trace=trace,
+                    latency_ms=(end - start) * 1000,
+                    correlation_id=correlation_id,
                 )
 
             final = f"{draft} (tool executed: {tool})"
             end = time.perf_counter()
             return OrchestratorResult(
-                final_output=final, tool_trace=trace, latency_ms=(end - start) * 1000
+                final_output=final,
+                tool_trace=trace,
+                latency_ms=(end - start) * 1000,
+                correlation_id=correlation_id,
             )
 
         end = time.perf_counter()
         return OrchestratorResult(
-            final_output="No action taken.", tool_trace=trace, latency_ms=(end - start) * 1000
+            final_output="No action taken.",
+            tool_trace=trace,
+            latency_ms=(end - start) * 1000,
+            correlation_id=correlation_id,
         )
