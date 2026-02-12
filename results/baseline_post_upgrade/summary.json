@@ -1,0 +1,14 @@
+{
+  "asr": 0.0,
+  "counts": {
+    "false_positives": 0,
+    "leakage_events": 0,
+    "successful_attacks": 0,
+    "task_successes": 245,
+    "total_runs": 250
+  },
+  "false_positive_rate": 0.0,
+  "latency_ms_p95": 8.782291988609359,
+  "leakage_rate": 0.0,
+  "task_success_rate": 0.98
+}
