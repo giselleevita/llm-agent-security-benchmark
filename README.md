@@ -131,17 +131,18 @@ If any threshold is violated (e.g., Leakage > 0 or ASR > max_asr), the workflow 
 
 ## Results
 
-### Latest local rerun (this host, runs=1)
+### Latest local rerun (this host, runs=5)
 
 | Baseline | ASR | Leakage | Task Success | False Positives | p95 latency (ms) |
 |---|---:|---:|---:|---:|---:|
-| B0 | 0.5417 | 0.1200 | 0.4800 | 0.0000 | 0.13 |
-| B1 | 0.5417 | 0.1200 | 0.4800 | 0.0000 | 0.14 |
+| B0 | 0.5417 | 0.1200 | 0.4800 | 0.0000 | 0.08 |
+| B1 | 0.5417 | 0.1200 | 0.4800 | 0.0000 | 0.11 |
 | B2 | 0.2708 | 0.0000 | 0.7400 | 0.0000 | 0.10 |
+| B3 | 0.0000 | 0.0000 | 0.9800 | 0.0000 | 8.78 |
 
 Notes:
-- B3 could not be rerun on this host because OPA is unavailable (`http://localhost:8181` connection refused).
-- Reproduce with Docker/OPA available using the commands in `Makefile`.
+- Comparison output: `results/summary_comparison.json`
+- Report artifacts: `results/report/summary_table.md`, `results/report/asr_by_category.md`, `results/report/*.png`
 
 ---
 
