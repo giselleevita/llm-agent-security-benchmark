@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from typing import Any, Dict, Iterable
+from typing import Any, Iterable
 from urllib.parse import urlparse
 
 

@@ -1,3 +1,5 @@
 package agent.policy
 
-# Allowlist logic is centralized in agent_policy.rego.
+is_tool_allowlisted if {
+  data.data.tools.allowed[_] == input.tool
+}

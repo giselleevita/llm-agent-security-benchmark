@@ -5,7 +5,7 @@ import uuid
 from dataclasses import dataclass
 from typing import Any, Dict, List, Tuple
 
-from agent_runtime.context import Taint, detect_canary
+from agent_runtime.context import Taint
 from gateway.pep import ToolGateway
 from tools.registry import ToolCallRequest
 
@@ -15,6 +15,7 @@ class OrchestratorResult:
     final_output: str
     tool_trace: List[Dict[str, Any]]
     latency_ms: float
+    request_id: str
     correlation_id: str
 
 
@@ -129,10 +130,19 @@ class AgentOrchestrator:
         self.max_steps = max_steps
         self.planner = MockModelPlanner()
 
-    def run(self, task: str, baseline: str, scenario: Dict[str, Any] | None = None, ablation: Dict[str, Any] | None = None) -> OrchestratorResult:
+    def run(
+        self,
+        task: str,
+        baseline: str,
+        scenario: Dict[str, Any] | None = None,
+        ablation: Dict[str, Any] | None = None,
+        request_id: str | None = None,
+    ) -> OrchestratorResult:
         start = time.perf_counter()
         trace: List[Dict[str, Any]] = []
         correlation_id = f"run-{uuid.uuid4().hex[:12]}"
+        if not request_id:
+            request_id = f"req-{uuid.uuid4().hex[:12]}"
 
         for step in range(1, self.max_steps + 1):
             tool, args, taint, draft = self.planner.plan_one_step(
@@ -150,6 +160,7 @@ class AgentOrchestrator:
                     "baseline": baseline,
                     "step": step,
                     "source": "mock_planner",
+                    "request_id": request_id,
                     "correlation_id": correlation_id,
                     "taint": taint.model_dump(),
                     "ablation": (ablation or {}),
@@ -167,6 +178,7 @@ class AgentOrchestrator:
                     final_output=final,
                     tool_trace=trace,
                     latency_ms=(end - start) * 1000,
+                    request_id=request_id,
                     correlation_id=correlation_id,
                 )
 
@@ -176,6 +188,7 @@ class AgentOrchestrator:
                 final_output=final,
                 tool_trace=trace,
                 latency_ms=(end - start) * 1000,
+                request_id=request_id,
                 correlation_id=correlation_id,
             )
 
@@ -184,5 +197,6 @@ class AgentOrchestrator:
             final_output="No action taken.",
             tool_trace=trace,
             latency_ms=(end - start) * 1000,
+            request_id=request_id,
             correlation_id=correlation_id,
         )

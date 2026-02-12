@@ -1,8 +1,13 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import platform
+import random
+import subprocess
 import time
+from datetime import UTC, datetime
 from typing import Any, Dict, List
 
 import yaml
@@ -17,6 +22,7 @@ from benchmark.scoring import (
     compute_threat_breakdown,
 )
 from benchmark.report import write_json
+from benchmark.schema import validate_summary_payload
 from gateway.pdp_client import PDPClient
 from gateway.pep import ToolGateway
 from tools.docs import DocStore
@@ -24,11 +30,49 @@ from tools.http import HttpMock
 from tools.tickets import TicketStore
 from tools.registry import ToolRegistry
 from agent_runtime.context import detect_canary
+from agent_runtime.policy_meta import compute_policy_hash
 
 
 def load_yaml(path: str) -> Dict[str, Any]:
     with open(path, "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
+
+
+def _git_commit() -> str:
+    try:
+        out = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True)
+        return out.strip()
+    except Exception:
+        return "unknown"
+
+
+def _sha256_json(data: Any) -> str:
+    payload = json.dumps(data, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def build_summary_meta(
+    *,
+    seed: int,
+    scenario_doc: Dict[str, Any],
+    defaults: Dict[str, Any],
+    ablation: Dict[str, Any],
+) -> Dict[str, Any]:
+    return {
+        "git_commit": _git_commit(),
+        "timestamp_utc": datetime.now(UTC).isoformat(),
+        "python_version": platform.python_version(),
+        "platform": platform.platform(),
+        "seed": seed,
+        "scenario_hash": _sha256_json(scenario_doc.get("scenarios") or []),
+        "config_hash": _sha256_json(
+            {
+                "defaults": defaults,
+                "ablation": ablation,
+            }
+        ),
+        "policy_hash": compute_policy_hash(),
+    }
 
 
 def is_adversarial_scenario(s: Dict[str, Any]) -> bool:
@@ -253,10 +297,12 @@ def main() -> None:
     ap.add_argument("--compare", action="store_true", help="Generate baseline comparison report")
     ap.add_argument("--opa-url", default=settings.opa_url)
     ap.add_argument("--ablation", default="none", help="Ablation name: none|no_approvals|no_path|no_canary|no_taint_approvals|no_ticket_size")
+    ap.add_argument("--seed", type=int, default=1, help="Random seed for deterministic benchmark ordering")
     args = ap.parse_args()
 
     doc = load_yaml(args.scenarios)
     defaults = doc.get("defaults") or {}
+    random.seed(args.seed)
 
     canaries = list(defaults.get("canaries") or ["CANARY_KEY_001", "CANARY_KEY_002"])
     allowed_domains = list(
@@ -267,7 +313,7 @@ def main() -> None:
     audit = AuditLogger("results/audit.jsonl")
     pdp = PDPClient(opa_url=args.opa_url)
 
-    scenarios = doc.get("scenarios") or []
+    scenarios = sorted((doc.get("scenarios") or []), key=lambda s: str(s.get("id", "")))
     ablation = ablation_flags(args.ablation)
     allowed_threats = {
         "direct_injection",
@@ -281,6 +327,13 @@ def main() -> None:
         if thr not in allowed_threats:
             raise ValueError(f"Scenario {s.get('id')} has invalid threat: {thr}")
         s["threat"] = thr
+
+    summary_meta = build_summary_meta(
+        seed=args.seed,
+        scenario_doc=doc,
+        defaults=defaults,
+        ablation=ablation,
+    )
 
     if args.baseline == "all" or args.compare:
         # Run all baselines
@@ -317,7 +370,11 @@ def main() -> None:
             print(f"  False Positives: {summary['false_positive_rate']:.4f}")
 
         write_json(args.out, {"runs": all_run_records})
-        write_json(args.summary, baseline_summaries.get("B3", {}))
+        b3_summary = dict(baseline_summaries.get("B3", {}))
+        b3_summary["schema_version"] = "1.1.0"
+        b3_summary["meta"] = summary_meta
+        validate_summary_payload(b3_summary)
+        write_json(args.summary, b3_summary)
 
         if args.compare:
             # Category breakdown for B3 (thesis-ready)
@@ -334,6 +391,7 @@ def main() -> None:
                 "threat_breakdown": {
                     "B3": threat_breakdown,
                 },
+                "meta": summary_meta,
                 "improvement": {
                     "B0_to_B3": {
                         "asr_reduction": baseline_summaries["B0"]["asr"] - baseline_summaries["B3"]["asr"],
@@ -403,6 +461,9 @@ def main() -> None:
 
         write_json(args.out, {"runs": run_records})
         summary = compute_metrics(outcomes)
+        summary["schema_version"] = "1.1.0"
+        summary["meta"] = summary_meta
+        validate_summary_payload(summary)
         write_json(args.summary, summary)
 
         print(f"Wrote {args.out} and {args.summary}")

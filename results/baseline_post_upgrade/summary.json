@@ -8,7 +8,18 @@
     "total_runs": 250
   },
   "false_positive_rate": 0.0,
-  "latency_ms_p95": 8.782291988609359,
+  "latency_ms_p95": 9.697125002276152,
   "leakage_rate": 0.0,
+  "meta": {
+    "config_hash": "33709186cc4c306c06a2dbca2a93330038975353a86993322c9b2e34195d576a",
+    "git_commit": "02465cbc7c2a330302aaf2fc1c6265eb07536323",
+    "platform": "macOS-26.2-arm64-arm-64bit-Mach-O",
+    "policy_hash": "7e42984cc5b391e48d6abebc09cb150b394684770a6dec4212bee1f3bb008c14",
+    "python_version": "3.14.2",
+    "scenario_hash": "80d36d0ae41b09ecae25429e3e23d1b73655af758dc8504ed33b9f69f281a3b4",
+    "seed": 1,
+    "timestamp_utc": "2026-02-12T11:57:46.369140+00:00"
+  },
+  "schema_version": "1.1.0",
   "task_success_rate": 0.98
 }

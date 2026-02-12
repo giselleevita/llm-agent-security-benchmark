@@ -2,7 +2,7 @@
 
 Date: 2026-02-12
 Reviewer role: Senior Security Engineer + Backend Architect
-Scope: `/Users/yusaf/Desktop/gigi uni/llm-agent-security-benchmark` only
+Scope: repository root (`llm-agent-security-benchmark`) only
 
 ## Phase A - Recovery and grounding
 
@@ -31,7 +31,7 @@ Scope: `/Users/yusaf/Desktop/gigi uni/llm-agent-security-benchmark` only
 | Benchmark harness | `benchmark/runner.py`, `benchmark/scoring.py`, `benchmark/scenarios/scenarios.yaml`, `benchmark/baselines.py` | Replays scenarios across baselines, computes outcomes and metrics | Constructs orchestrator + gateway, writes run and summary JSON |
 | Reporting/plots | `scripts/report_results.py`, `benchmark/report.py` | Generates markdown tables and experiment plots | Reads `results/**/summary.json` and `run.json` |
 | Audit logging | `agent_runtime/audit.py` and PEP `_audit()` | JSONL event logging per tool decision | Includes tool args, decision, reason, latency, scenario metadata |
-| Docs/diagrams | `docs/architecture.md`, `docs/benchmark_methodology.md`, `docs/policy_design.md`, `docs/reproducibility.md` | Explain architecture, methodology, and controls | Mermaid architecture graph in `docs/architecture.md` |
+| Docs/diagrams | `docs/ARCHITECTURE.md`, `docs/benchmark_methodology.md`, `docs/policy_design.md`, `docs/reproducibility.md` | Explain architecture, methodology, and controls | Mermaid architecture graph in `docs/ARCHITECTURE.md` |
 | CI/CD security gate | `.github/workflows/security_eval.yml`, `ci/thresholds.yaml` | Runs benchmark and fails on threshold regressions | Uses `benchmark.runner` outputs + threshold checks |
 
 ## Phase 2 - Claims verification matrix
@@ -88,7 +88,7 @@ Scope: `/Users/yusaf/Desktop/gigi uni/llm-agent-security-benchmark` only
 
 | Dimension | Score | Evidence |
 |---|---:|---|
-| Architecture clarity | 8 | Clear modular split (`agent_runtime/`, `gateway/`, `policies/`, `benchmark/`) and docs in `docs/architecture.md` |
+| Architecture clarity | 8 | Clear modular split (`agent_runtime/`, `gateway/`, `policies/`, `benchmark/`) and docs in `docs/ARCHITECTURE.md` |
 | Code quality/modularity | 7 | Clean separation of PEP/PDP/tool registry; deterministic mocks; some recovery-era drift in tests/init files fixed during review |
 | Test quality/coverage | 6 | Good policy behavior tests exist (`tests/test_http_path_policy.py`, `tests/test_approval_semantics.py`), but many integration tests depend on local OPA availability and skip |
 | Security posture | 6 | Strong baseline controls in B3; missing robust URL canonicalization/private-IP handling/correlation IDs |
@@ -144,7 +144,7 @@ Scope: `/Users/yusaf/Desktop/gigi uni/llm-agent-security-benchmark` only
 ### C) NICE (polish)
 
 1. Add architecture one-pager with sequence diagram and trust boundaries.
-- Files: `docs/architecture.md` or new `docs/architecture_enterprise.md`.
+- Files: `docs/ARCHITECTURE.md` or new `docs/architecture_enterprise.md`.
 - Acceptance criteria: includes request flow + trust boundary labels.
 - Effort: S.
 - Dependencies: none.

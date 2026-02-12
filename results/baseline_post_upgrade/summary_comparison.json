@@ -10,7 +10,7 @@
         "total_runs": 250
       },
       "false_positive_rate": 0.0,
-      "latency_ms_p95": 0.08266701479442418,
+      "latency_ms_p95": 0.20916701760143042,
       "leakage_rate": 0.12,
       "task_success_rate": 0.48
     },
@@ -24,7 +24,7 @@
         "total_runs": 250
       },
       "false_positive_rate": 0.0,
-      "latency_ms_p95": 0.10775000555440784,
+      "latency_ms_p95": 0.17275000573135912,
       "leakage_rate": 0.12,
       "task_success_rate": 0.48
     },
@@ -38,7 +38,7 @@
         "total_runs": 250
       },
       "false_positive_rate": 0.0,
-      "latency_ms_p95": 0.10379200102761388,
+      "latency_ms_p95": 0.19579200306907296,
       "leakage_rate": 0.0,
       "task_success_rate": 0.74
     },
@@ -52,7 +52,7 @@
         "total_runs": 250
       },
       "false_positive_rate": 0.0,
-      "latency_ms_p95": 8.782291988609359,
+      "latency_ms_p95": 9.697125002276152,
       "leakage_rate": 0.0,
       "task_success_rate": 0.98
     }
@@ -69,7 +69,7 @@
           "total_runs": 65
         },
         "false_positive_rate": 0.0,
-        "latency_ms_p95": 8.216165995690972,
+        "latency_ms_p95": 8.339749998413026,
         "leakage_rate": 0.0,
         "task_success_rate": 1.0
       },
@@ -83,7 +83,7 @@
           "total_runs": 20
         },
         "false_positive_rate": 0.0,
-        "latency_ms_p95": 9.784791996935382,
+        "latency_ms_p95": 12.240624986588955,
         "leakage_rate": 0.0,
         "task_success_rate": 1.0
       },
@@ -97,7 +97,7 @@
           "total_runs": 40
         },
         "false_positive_rate": 0.0,
-        "latency_ms_p95": 8.337374980328605,
+        "latency_ms_p95": 9.697125002276152,
         "leakage_rate": 0.0,
         "task_success_rate": 0.875
       },
@@ -111,7 +111,7 @@
           "total_runs": 75
         },
         "false_positive_rate": 0.0,
-        "latency_ms_p95": 7.547791989054531,
+        "latency_ms_p95": 12.433750001946464,
         "leakage_rate": 0.0,
         "task_success_rate": 1.0
       },
@@ -125,7 +125,7 @@
           "total_runs": 50
         },
         "false_positive_rate": 0.0,
-        "latency_ms_p95": 8.403125015320256,
+        "latency_ms_p95": 7.902749988716096,
         "leakage_rate": 0.0,
         "task_success_rate": 1.0
       }
@@ -142,6 +142,16 @@
       "leakage_reduction": 0.0
     }
   },
+  "meta": {
+    "config_hash": "33709186cc4c306c06a2dbca2a93330038975353a86993322c9b2e34195d576a",
+    "git_commit": "02465cbc7c2a330302aaf2fc1c6265eb07536323",
+    "platform": "macOS-26.2-arm64-arm-64bit-Mach-O",
+    "policy_hash": "7e42984cc5b391e48d6abebc09cb150b394684770a6dec4212bee1f3bb008c14",
+    "python_version": "3.14.2",
+    "scenario_hash": "80d36d0ae41b09ecae25429e3e23d1b73655af758dc8504ed33b9f69f281a3b4",
+    "seed": 1,
+    "timestamp_utc": "2026-02-12T11:57:46.369140+00:00"
+  },
   "threat_breakdown": {
     "B3": {
       "direct_injection": {
@@ -154,7 +164,7 @@
           "total_runs": 65
         },
         "false_positive_rate": 0.0,
-        "latency_ms_p95": 8.216165995690972,
+        "latency_ms_p95": 8.339749998413026,
         "leakage_rate": 0.0,
         "task_success_rate": 1.0
       },
@@ -168,7 +178,7 @@
           "total_runs": 20
         },
         "false_positive_rate": 0.0,
-        "latency_ms_p95": 9.784791996935382,
+        "latency_ms_p95": 12.240624986588955,
         "leakage_rate": 0.0,
         "task_success_rate": 1.0
       },
@@ -182,7 +192,7 @@
           "total_runs": 40
         },
         "false_positive_rate": 0.0,
-        "latency_ms_p95": 8.337374980328605,
+        "latency_ms_p95": 9.697125002276152,
         "leakage_rate": 0.0,
         "task_success_rate": 0.875
       },
@@ -196,7 +206,7 @@
           "total_runs": 75
         },
         "false_positive_rate": 0.0,
-        "latency_ms_p95": 7.547791989054531,
+        "latency_ms_p95": 12.433750001946464,
         "leakage_rate": 0.0,
         "task_success_rate": 1.0
       },
@@ -210,7 +220,7 @@
           "total_runs": 50
         },
         "false_positive_rate": 0.0,
-        "latency_ms_p95": 8.403125015320256,
+        "latency_ms_p95": 7.902749988716096,
         "leakage_rate": 0.0,
         "task_success_rate": 1.0
       }

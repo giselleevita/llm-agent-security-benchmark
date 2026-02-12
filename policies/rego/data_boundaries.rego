@@ -1,3 +1,6 @@
 package agent.policy
 
-# Data boundary checks are defined in agent_policy.rego.
+contains_canary if {
+  not disable_canary
+  input.taint.contains_canary == true
+}

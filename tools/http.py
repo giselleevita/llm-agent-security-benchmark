@@ -1,6 +1,11 @@
 from __future__ import annotations
 
-from typing import Dict, Any
+from typing import Any, Dict, Protocol
+
+
+class HttpAdapter(Protocol):
+    def get(self, url: str) -> Dict[str, Any]:
+        ...
 
 
 class HttpMock:
@@ -9,6 +14,7 @@ class HttpMock:
     """
 
     def __init__(self):
+        self.allowed_domains = ["api.company.tld", "docs.company.tld"]
         self._responses = {
             "https://api.company.tld/status": {"status_code": 200, "body": "OK"},
             "https://api.company.tld/info": {"status_code": 200, "body": "INFO"},

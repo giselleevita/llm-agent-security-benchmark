@@ -1,176 +1,120 @@
-# Secure Agent Runtime — Policy-Enforced Tool Use + Prompt-Injection Benchmark
+# Secure Agent Runtime Benchmark
 
-This repository contains a **secure runtime wrapper for tool-using LLM agents** and a **reproducible benchmark harness** to measure resilience against **direct and indirect prompt injection**.
+[![Security Evaluation Gate](https://github.com/giselleevita/llm-agent-security-benchmark/actions/workflows/security_eval.yml/badge.svg)](https://github.com/giselleevita/llm-agent-security-benchmark/actions/workflows/security_eval.yml)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
-The core idea is to treat the LLM as **untrusted**: the model can *suggest* actions, but an external **Tool Gateway** (Policy Enforcement Point, PEP) makes the final decision using **policy-as-code** (Policy Decision Point, PDP). A CI workflow runs the benchmark as a **security gate** and fails builds on security regressions.
+Enterprise-focused runtime security boundary for tool-using LLM agents, with reproducible benchmark evidence.
 
----
+## What problem this solves
+Prompt-only guardrails are not a reliable control plane for agent tool use. This project enforces decisions outside the model:
+- **PEP (gateway)** validates tool requests and context.
+- **PDP (OPA/Rego)** returns `ALLOWED`, `DENY_*`, or `APPROVAL_REQUIRED`.
+- **Benchmark harness** quantifies security/utility trade-offs across B0-B3 baselines.
 
-## Thesis focus (what this project demonstrates)
-- **Secure Agent Runtime**: Tool gateway enforcing least privilege, parameter constraints, data boundaries, and approvals.
-- **Benchmark Harness**: Scenario-based evaluation with measurable security and utility metrics.
-- **CI Security Gate**: Automated evaluation oPRs/pushes; fails when ASR/leakage exceed thresholds.
+## Architecture
+![Architecture](docs/assets/architecture.png)
 
----
-
-## Key security controls
-1. **Tool allowlisting** — the agent can only call registered tools.
-2. **Parameter constraints** — e.g., HTTP only to allowlisted domains/paths with URL-authority checks; tickets only in allowed projects.
-3. **Data boundaries / leakage prevention** — canary token policies prevent exfiltration.
-4. **Approval flow** — high-risk actions can require explicit external approval.
-5. **Audit trace** — every tool request/decision is logged with rationale and a `correlation_id`.
-
----
-
-## Benchmark design
-Scenarios are defined in `benchmark/scenarios/scenarios.yaml` and include:
-- **Direct injection** (malicious user input)
-- **Indirect injection** (malicious retrieved content via RAG)
-- **Tool misuse** (parameter/domain/project abuse)
-- **Data exfiltration** (canary leakage attempts)
-- **Excessive agency** (actions without explicit approval)
-
-### Metrics
-The benchmark reports:
-- **ASR (Attack Success Rate)**: % of runs where a forbidden action was executed
-- **Leakage Rate**: where canary tokens appear in outbound requests or final output
-- **Task Success Rate**: % of runs where the benign task is completed correctly
-- **False Positive Rate**: % of benign actions incorrectly blocked
-- **Overhead**: latency/tool-call count deltas vs baseline
-
-### Baselines
-- **B0**: No guardrails
-- **B1**: Prompt-only guardrails (system prompt rules)
-- **B2**: Simple checks (e.g., canary/regex blocking)
-- **B3**: Policy-enforced tool gateway (proposed runtime)
-- Optional: Hybrid configurations
-
----
+See `docs/ARCHITECTURE.md`.
 
 ## Quickstart
-
-### Prerequisites
-- Python 3.11+
-- Docker + Docker Compose
-
-### Setup
 ```bash
 cp .env.example .env
-python -m venv .venv
-source .venv/bin/activate
-pip install -U pip
-pip install -e .
+make setup
+make demo
 ```
 
-### Start services (OPA + mock tool services)
+## Five commands (standard workflow)
 ```bash
-docker compose up -d
+make setup
+make test
+make policy-test
+make bench
+make report
 ```
 
-### Run the benchmark (single baseline)
+## Key Results
+Latest local B3 run (`RUNS=5`, seed `1`) from `results/summary_comparison.json`:
+- `ASR`: `0.0000`
+- `Leakage`: `0.0000`
+- `Task success`: `0.9800`
+- `False positives`: `0.0000`
+- `p95 latency`: `9.22 ms`
+
+## CI Regression Gate
+CI enforces security thresholds and fails on regressions:
+- Workflow: `.github/workflows/security_eval.yml`
+- Threshold config: `ci/thresholds.yaml`
+- Enforced checks: lint, unit tests, OPA policy tests, benchmark gate.
+
+## Example run output
+`results/summary.json` (B3 summary) includes:
+- `asr`
+- `leakage_rate`
+- `task_success_rate`
+- `false_positive_rate`
+- `latency_ms_p95`
+- `schema_version`
+- `meta` (commit, seed, platform, hashes)
+
+## Baselines (B0-B3)
+- **B0**: permissive execution.
+- **B1**: prompt-only controls.
+- **B2**: simple checks in gateway.
+- **B3**: policy-enforced runtime via OPA.
+
+## How to interpret metrics
+- **ASR** lower is better.
+- **Leakage** lower is better.
+- **Task success** higher is better.
+- **False positives** lower is better.
+- **p95 latency** captures safety overhead.
+
+## Add a new tool adapter
+1. Add args + executor in `tools/registry.py`.
+2. Add allowlist + constraints in `policies/`.
+3. Add tests in `tests/` and `policies/tests/`.
+
+See `docs/TOOLS.md`.
+
+## Add a new scenario
+1. Append scenario in `benchmark/scenarios/scenarios.yaml`.
+2. Set `category`, `threat`, and `expected` constraints.
+3. Run `make bench` and review report deltas.
+
+See `docs/SCENARIOS.md`.
+
+## Policy authoring
+- Policy files: `policies/rego/`
+- Data: `policies/data/policy_data.json`
+- Tests: `policies/tests/`
+
+See `docs/POLICY_AUTHORING.md`.
+
+## CI gating
+GitHub Actions runs lint, unit tests, Rego tests, and benchmark threshold checks.
+- Workflow: `.github/workflows/security_eval.yml`
+- Thresholds: `ci/thresholds.yaml`
+
+## Report screenshots/artifacts
+Generated by `make report`:
+- `results/latest/report/index.html`
+- `results/latest/report/asr_comparison.png`
+- `results/latest/report/leakage_comparison.png`
+- `results/latest/report/task_success_comparison.png`
+
+## Public Demo Mode
+Run a deterministic one-command demo:
 ```bash
-python -m benchmark.runner \
-  --scenarios benchmark/scenarios/scenarios.yaml \
-  --baseline B3 \
-  --runs 5 \
-  --out results/run.json \
-  --summary results/summary.json
+make setup && make demo
 ```
+This runs `RUNS=1`, generates report artifacts, and prints the report path.
 
-### Run baseline comparison (all baselines)
-```bash
-python -m benchmark.runner \
-  --scenarios benchmark/scenarios/scenarios.yaml \
-  --baseline all \
-  --runs 5 \
-  --compare \
-  --out results/run.json \
-  --summary results/summary.json
-```
-
-This generates:
-- `results/summary.json` - B3 metrics (for CI gating)
-- `results/summary_comparison.json` - Comparison across all baselines
-- Console output showing improvement from B0 → B3
-
-### View results
-- `results/summary.json` contains aggregated metrics used by CI gating.
-- `results/run.json` contains per-scenario traces (including policy decisions).
-- `results/summary_comparison.json` (when using `--compare`) shows baseline comparison metrics.
-
----
-
-## CI Security Gate
-The GitHub Actions workflow runs the benchmark and checks thresholds from:
-
-`ci/thresholds.yaml`
-
-If any threshold is violated (e.g., Leakage > 0 or ASR > max_asr), the workflow fails.
-
----
-
-## Repository layout
-- `agent_runtime/` runtime, orchestrator, taint labeling, audit
-- `gateway/` tool gateway (PEP), OPA client, validators, approvals
-- `policies/` Rego policies and policy data
-- `tools/` tool registry + mock tools/services
-- `benchmark/` scenarios, runner, scoring, reporting
-- `ci/` thresholds for gating
-- `.github/` CI workflows
-- `results/` output artifacts
-
----
-
-## Why this matters
-- Enterprise agents need enforcement outside the model; this project demonstrates a policy-first execution boundary.
-- Decisions are auditable and reproducible (`allow`/`deny`/`requires_approval`) rather than prompt-only best effort.
-- The benchmark ties controls to measurable outcomes (ASR, leakage, task success, false positives, p95 latency).
-- CI can gate merges on security thresholds, turning evaluation into an operational control.
-
----
-
-## Results
-
-### Latest local rerun (this host, runs=5)
-
-| Baseline | ASR | Leakage | Task Success | False Positives | p95 latency (ms) |
-|---|---:|---:|---:|---:|---:|
-| B0 | 0.5417 | 0.1200 | 0.4800 | 0.0000 | 0.08 |
-| B1 | 0.5417 | 0.1200 | 0.4800 | 0.0000 | 0.11 |
-| B2 | 0.2708 | 0.0000 | 0.7400 | 0.0000 | 0.10 |
-| B3 | 0.0000 | 0.0000 | 0.9800 | 0.0000 | 8.78 |
-
-Notes:
-- Comparison output: `results/summary_comparison.json`
-- Report artifacts: `results/report/summary_table.md`, `results/report/asr_by_category.md`, `results/report/*.png`
-
----
-
-## Architecture (Mermaid)
-
-```mermaid
-flowchart LR
-  U["User Task / Scenario"] --> O["Agent Orchestrator"]
-  O -->|ToolCallRequest| G["Tool Gateway (PEP)"]
-  G -->|Policy input| P["OPA (PDP)"]
-  P -->|allow/deny/approval| G
-  G -->|allowed only| T["Tool Registry + Mocks"]
-  T --> G
-  G --> A["Audit JSONL"]
-  O --> R["Final Output + Trace"]
-  B["Benchmark Runner"] --> O
-  B --> S["summary.json / run.json"]
-  CI["CI Gate"] --> S
-```
-
----
-
-## Ethics & safety
-- No real secrets or personal data: uses synthetic canary tokens.
-- Defensive focus: evaluates mitigations and enforcement (no “attack kit”).
-- Designed for reproducible research and responsible disclosure practices.
-
----
+## Security and governance docs
+- `docs/THREAT_MODEL.md`
+- `docs/SECURITY_CLAIMS.md`
+- `docs/RESULT_SCHEMA.md`
+- `docs/OBSERVABILITY.md`
+- `SECURITY.md`
 
 ## License
-Apache-2.0. See `LICENSE`. Project version: `1.0.0+thesis`.
+Apache-2.0 (`LICENSE`)

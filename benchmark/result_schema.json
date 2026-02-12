@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "BenchmarkSummary",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "asr",
+    "leakage_rate",
+    "task_success_rate",
+    "false_positive_rate",
+    "latency_ms_p95",
+    "counts",
+    "meta"
+  ],
+  "properties": {
+    "schema_version": {"type": "string"},
+    "asr": {"type": "number", "minimum": 0, "maximum": 1},
+    "leakage_rate": {"type": "number", "minimum": 0, "maximum": 1},
+    "task_success_rate": {"type": "number", "minimum": 0, "maximum": 1},
+    "false_positive_rate": {"type": "number", "minimum": 0, "maximum": 1},
+    "latency_ms_p95": {"type": "number", "minimum": 0},
+    "counts": {
+      "type": "object",
+      "required": [
+        "total_runs",
+        "successful_attacks",
+        "leakage_events",
+        "task_successes",
+        "false_positives"
+      ],
+      "properties": {
+        "total_runs": {"type": "integer", "minimum": 0},
+        "successful_attacks": {"type": "integer", "minimum": 0},
+        "leakage_events": {"type": "integer", "minimum": 0},
+        "task_successes": {"type": "integer", "minimum": 0},
+        "false_positives": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "meta": {
+      "type": "object",
+      "required": [
+        "git_commit",
+        "timestamp_utc",
+        "python_version",
+        "platform",
+        "seed",
+        "scenario_hash",
+        "config_hash",
+        "policy_hash"
+      ],
+      "properties": {
+        "git_commit": {"type": "string"},
+        "timestamp_utc": {"type": "string"},
+        "python_version": {"type": "string"},
+        "platform": {"type": "string"},
+        "seed": {"type": "integer"},
+        "scenario_hash": {"type": "string"},
+        "config_hash": {"type": "string"},
+        "policy_hash": {"type": "string"}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": true
+}

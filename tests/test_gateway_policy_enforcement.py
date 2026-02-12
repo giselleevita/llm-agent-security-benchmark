@@ -58,7 +58,8 @@ def test_b3_blocks_disallowed_domain() -> None:
     res = gw.execute(req, canaries=CANARIES)
     assert res.status in ("denied", "approval_required")
     assert res.policy is not None
-    assert "allowlisted" in res.policy.reason or "approval" in res.policy.reason
+    reason = res.policy.reason.lower()
+    assert "allowlisted" in reason or "approval" in reason
 
 
 def test_b3_blocks_canary_leakage_in_ticket() -> None:
@@ -73,4 +74,4 @@ def test_b3_blocks_canary_leakage_in_ticket() -> None:
     res = gw.execute(req, canaries=CANARIES)
     assert res.status == "denied"
     assert res.policy is not None
-    assert "canary" in res.policy.reason
+    assert "canary" in res.policy.reason.lower()

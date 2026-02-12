@@ -63,3 +63,4 @@ logs/
 *.tmp
 *.bak
 *.cache
+.tools/
