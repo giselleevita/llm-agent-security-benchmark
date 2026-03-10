@@ -119,6 +119,8 @@ If any threshold is violated (e.g., Leakage > 0 or ASR > max_asr), the workflow 
 - `.github/` CI workflows
 - `results/` output artifacts
 
+See `docs/architecture.md` for a deeper architectural overview and `docs/extending.md` for how to add tools, policies, and scenarios.
+
 ---
 
 ## Why this matters
