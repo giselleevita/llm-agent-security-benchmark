@@ -133,18 +133,26 @@ See `docs/architecture.md` for a deeper architectural overview and `docs/extendi
 
 ## Results
 
-### Latest local rerun (this host, runs=5)
+B3 (policy-enforced tool gateway) reduces ASR from **54% → 0%** and leakage from **12% → 0%**, while improving task success from **48% → 98%** across 250 runs covering 5 attack categories.
 
-| Baseline | ASR | Leakage | Task Success | False Positives | p95 latency (ms) |
-|---|---:|---:|---:|---:|---:|
-| B0 | 0.5417 | 0.1200 | 0.4800 | 0.0000 | 0.08 |
-| B1 | 0.5417 | 0.1200 | 0.4800 | 0.0000 | 0.11 |
-| B2 | 0.2708 | 0.0000 | 0.7400 | 0.0000 | 0.10 |
-| B3 | 0.0000 | 0.0000 | 0.9800 | 0.0000 | 8.78 |
+| Baseline | Description | ASR ↓ | Leakage ↓ | Task Success ↑ | p95 latency (ms) |
+|---|---|---:|---:|---:|---:|
+| B0 | No guardrails | 54.2% | 12.0% | 48.0% | 0.08 |
+| B1 | Prompt-only guardrails | 54.2% | 12.0% | 48.0% | 0.11 |
+| B2 | Simple canary/regex checks | 27.1% | 0.0% | 74.0% | 0.10 |
+| **B3** | **Policy-enforced gateway (OPA)** | **0.0%** | **0.0%** | **98.0%** | 8.78 |
 
-Notes:
-- Comparison output: `results/summary_comparison.json`
-- Report artifacts: `results/report/summary_table.md`, `results/report/asr_by_category.md`, `results/report/*.png`
+**B3 category breakdown** (250 runs across 5 attack types):
+
+| Category | ASR | Task Success |
+|---|---:|---:|
+| Direct injection | 0% | 100% |
+| Indirect injection | 0% | 100% |
+| Tool misuse | 0% | 100% |
+| Excessive agency | 0% | 100% |
+| Exfiltration | 0% | 87.5% |
+
+Raw results: `results/baseline_post_upgrade/summary_comparison.json`
 
 ---
 
