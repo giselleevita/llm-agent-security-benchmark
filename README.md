@@ -1,5 +1,10 @@
 # Secure Agent Runtime — Policy-Enforced Tool Use + Prompt-Injection Benchmark
 
+![CI](https://github.com/giselleevita/llm-agent-security-benchmark/actions/workflows/benchmark.yml/badge.svg)
+![Python](https://img.shields.io/badge/python-3.11%2B-blue)
+![License](https://img.shields.io/badge/license-Apache--2.0-green)
+![Version](https://img.shields.io/badge/version-1.0.0-informational)
+
 This repository contains a **secure runtime wrapper for tool-using LLM agents** and a **reproducible benchmark harness** to measure resilience against **direct and indirect prompt injection**.
 
 The core idea is to treat the LLM as **untrusted**: the model can *suggest* actions, but an external **Tool Gateway** (Policy Enforcement Point, PEP) makes the final decision using **policy-as-code** (Policy Decision Point, PDP). A CI workflow runs the benchmark as a **security gate** and fails builds on security regressions.
@@ -9,7 +14,7 @@ The core idea is to treat the LLM as **untrusted**: the model can *suggest* acti
 ## Thesis focus (what this project demonstrates)
 - **Secure Agent Runtime**: Tool gateway enforcing least privilege, parameter constraints, data boundaries, and approvals.
 - **Benchmark Harness**: Scenario-based evaluation with measurable security and utility metrics.
-- **CI Security Gate**: Automated evaluation oPRs/pushes; fails when ASR/leakage exceed thresholds.
+- **CI Security Gate**: Automated evaluation on PRs/pushes; fails when ASR/leakage exceed thresholds.
 
 ---
 
@@ -177,8 +182,20 @@ flowchart LR
 
 ## Ethics & safety
 - No real secrets or personal data: uses synthetic canary tokens.
-- Defensive focus: evaluates mitigations and enforcement (no “attack kit”).
+- Defensive focus: evaluates mitigations and enforcement (no "attack kit").
 - Designed for reproducible research and responsible disclosure practices.
+
+---
+
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for branch naming, issue labels, and the PR checklist.
+
+---
+
+## Changelog
+
+See [CHANGELOG.md](./CHANGELOG.md) for version history.
 
 ---
 
