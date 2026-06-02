@@ -9,6 +9,8 @@ This repository contains a **secure runtime wrapper for tool-using LLM agents** 
 
 The core idea is to treat the LLM as **untrusted**: the model can *suggest* actions, but an external **Tool Gateway** (Policy Enforcement Point, PEP) makes the final decision using **policy-as-code** (Policy Decision Point, PDP). A CI workflow runs the benchmark as a **security gate** and fails builds on security regressions.
 
+For the hiring-focused project narrative, see [docs/CASE_STUDY.md](docs/CASE_STUDY.md).
+
 ---
 
 ## Thesis focus (what this project demonstrates)
