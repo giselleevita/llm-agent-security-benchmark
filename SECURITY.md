@@ -1,44 +1,32 @@
-## Security Policy
+# Security Policy
 
-This repository contains a **secure agent runtime** and a **prompt-injection benchmark harness**. It is designed for **research and evaluation** of security controls for tool-using LLM agents, not as a drop-in production security gateway.
+## Supported Versions
 
-### Scope
+| Version | Supported |
+|---------|----------|
+| 0.x     | ✅        |
 
-In scope:
+## Reporting a Vulnerability
 
-- Evaluating **policy-enforced tool use** (tool allowlists, parameter constraints, approvals).
-- Measuring resilience to **direct and indirect prompt injection**, tool misuse, and data exfiltration attempts.
-- Running a **security evaluation gate in CI** that fails builds when metrics violate configured thresholds.
+Please **do not** open a public GitHub issue for security vulnerabilities.
 
-Out of scope:
+Report vulnerabilities privately by emailing: **quaryn@protonmail.com**
 
-- End-to-end hardening of the surrounding LLM stack (model hosting, auth, network perimeter).
-- Protection against compromised tool backends, model supply-chain issues, or malicious infrastructure.
-- Guarantees that the included scenarios cover all real-world attack techniques.
+Include:
+- A description of the vulnerability
+- Steps to reproduce
+- Potential impact
+- Any suggested fix (optional)
 
-### Intended usage
+You can expect an acknowledgement within **48 hours** and a resolution or status update within **7 days**.
 
-- As a **benchmarking framework** to compare agent security controls and configurations.
-- As a **reference architecture** for policy-first agent runtimes (PEP/PDP style), where decisions are auditable.
-- As a **CI security check** that turns evaluation metrics into operational gates.
+## Scope
 
-If you adapt this runtime for production:
+This repository is a **research benchmark** for evaluating LLM agent security controls. It is not intended for use against systems you do not own or have explicit permission to test.
 
-- Perform a dedicated **threat model** for your environment and tools.
-- Add **monitoring, alerting, and rate-limiting** around any automated blocking decisions.
-- Validate thresholds and scenarios against **your own attack library and datasets**.
+- **In scope:** vulnerabilities in the benchmark tooling itself (e.g. unsafe code execution, credential leakage, dependency vulnerabilities)
+- **Out of scope:** findings produced *by* the benchmark against third-party systems
 
-### Reporting vulnerabilities
+## Responsible Disclosure
 
-If you believe you have found a vulnerability in:
-
-- The enforcement logic (e.g., a bypass of the gateway/policies in supported scenarios), or
-- The benchmark/CI integration (e.g., a way to tamper with evaluation results),
-
-please open a **private issue** or contact the maintainer directly via GitHub instead of disclosing it publicly first. Include:
-
-- A minimal reproducible example (scenario, configuration, and observed behavior).
-- Environment details (Python version, OS, how you ran the benchmark or runtime).
-
-Security-impacting reports will be prioritized where possible, subject to the research nature of the project.
-
+We follow responsible disclosure practices. Credit will be given to reporters in the changelog unless anonymity is requested.
