@@ -5,7 +5,7 @@ import uuid
 from dataclasses import dataclass
 from typing import Any, Dict, List, Tuple
 
-from agent_runtime.context import Taint, detect_canary
+from agent_runtime.context import Taint
 from gateway.pep import ToolGateway
 from tools.registry import ToolCallRequest
 

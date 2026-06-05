@@ -84,15 +84,23 @@ is_ipv6_literal(host) if {
   contains(host, ":")
 }
 
-# Parse URL to extract host and path
-# Remove scheme by splitting on "://" and taking the second part
+# Parse URL to extract scheme, host, and path.
+# The benchmark uses deterministic mock HTTP, but the policy still models
+# production-grade URL constraints: HTTPS only, no userinfo, exact full path.
+parse_url_scheme(url) = scheme if {
+  scheme_parts := split(url, "://")
+  count(scheme_parts) > 1
+  scheme := lower(scheme_parts[0])
+}
+
 parse_url_host(url) = host if {
   scheme_parts := split(url, "://")
   count(scheme_parts) > 1
   after_scheme := scheme_parts[1]
   parts := split(after_scheme, "/")
   authority := parts[0]
-  host := host_from_authority(authority)
+  raw_host := host_from_authority(authority)
+  host := lower(raw_host)
 }
 
 contains_userinfo(url) if {
@@ -108,13 +116,18 @@ parse_url_path(url) = path if {
   scheme_parts := split(url, "://")
   count(scheme_parts) > 1
   after_scheme := scheme_parts[1]
-  parts := split(after_scheme, "/")
+  before_query := split(after_scheme, "?")[0]
+  parts := split(before_query, "/")
   count(parts) > 1
-  path_with_query := parts[1]
-  path_parts := split(path_with_query, "?")
-  path := concat("", ["/", path_parts[0]])
+  path_segments := array.slice(parts, 1, count(parts))
+  path := concat("", ["/", concat("/", path_segments)])
 } else = "/" if {
   true
+}
+
+parsed_scheme = s if {
+  input.tool == "http_get"
+  s := parse_url_scheme(input.args.url)
 }
 
 parsed_host = h if {
@@ -142,6 +155,10 @@ domain_allowed(host) if {
 
 domain_allowed(host) if {
   domain_allowed_suffix(host)
+}
+
+scheme_allowed if {
+  parsed_scheme == "https"
 }
 
 # Allowed path list stored in OPA data
@@ -197,6 +214,9 @@ deny_reason := "canary_detected" if {
 } else := "invalid_url_authority" if {
   input.tool == "http_get"
   contains_userinfo(input.args.url)
+} else := "invalid_url_scheme" if {
+  input.tool == "http_get"
+  not scheme_allowed
 } else := "domain_not_allowlisted" if {
   input.tool == "http_get"
   h := parsed_host

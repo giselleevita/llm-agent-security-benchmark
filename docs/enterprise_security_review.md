@@ -4,6 +4,17 @@ Date: 2026-02-12
 Reviewer role: Senior Security Engineer + Backend Architect
 Scope: `/Users/yusaf/Desktop/gigi uni/llm-agent-security-benchmark` only
 
+## Maintenance status
+
+Updated on 2026-06-05 after the original review below:
+- Implemented full HTTP path matching so `/status/admin` no longer matches the `/status` allowlist entry.
+- Added HTTPS-only policy enforcement for `http_get`.
+- Kept SSRF-specific denial reasons ahead of generic scheme denial for private/IP literal cases.
+- Added gateway fail-closed handling when the PDP is unavailable, with deterministic audit coverage.
+- Pinned the default OPA container image, added the missing Apache-2.0 license file, and restored the advertised SBOM target.
+
+Remaining productionization work: IDNA/canonical path decoding for a real HTTP adapter, DNS resolution pinning for private-network protection, and OPA-free unit evaluation for Rego policy rules.
+
 ## Phase A - Recovery and grounding
 
 ### Recovery outcome

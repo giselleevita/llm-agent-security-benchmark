@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 from pydantic import BaseModel
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 from agent_runtime.config import settings
 from agent_runtime.audit import AuditLogger

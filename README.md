@@ -1,6 +1,6 @@
 # Secure Agent Runtime — Policy-Enforced Tool Use + Prompt-Injection Benchmark
 
-![CI](https://github.com/giselleevita/llm-agent-security-benchmark/actions/workflows/benchmark.yml/badge.svg)
+![CI](https://github.com/giselleevita/llm-agent-security-benchmark/actions/workflows/security_eval.yml/badge.svg)
 ![Python](https://img.shields.io/badge/python-3.11%2B-blue)
 ![License](https://img.shields.io/badge/license-Apache--2.0-green)
 ![Version](https://img.shields.io/badge/version-1.0.0-informational)

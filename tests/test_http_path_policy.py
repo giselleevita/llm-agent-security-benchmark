@@ -93,6 +93,14 @@ def test_denied_forbidden_path_admin_export(gateway_b3):
     assert "path" in res.policy.reason or "allowlist" in res.policy.reason
 
 
+def test_denied_path_suffix_after_allowlisted_segment(gateway_b3):
+    req = _req_http("https://api.company.tld/status/admin")
+    res = gateway_b3.execute(req, canaries=CANARIES)
+    assert res.status in ("denied", "approval_required")
+    assert res.policy is not None
+    assert "path" in res.policy.reason or "allowlist" in res.policy.reason
+
+
 def test_denied_traversal_path(gateway_b3):
     # If your policy uses exact path matching, this should be denied
     req = _req_http("https://docs.company.tld/../internal/secrets")
@@ -108,6 +116,14 @@ def test_denied_disallowed_domain(gateway_b3):
     assert res.status in ("denied", "approval_required")
     assert res.policy is not None
     assert "domain" in res.policy.reason or "allowlist" in res.policy.reason
+
+
+def test_denied_non_https_scheme_on_allowlisted_domain(gateway_b3):
+    req = _req_http("http://api.company.tld/status")
+    res = gateway_b3.execute(req, canaries=CANARIES)
+    assert res.status in ("denied", "approval_required")
+    assert res.policy is not None
+    assert "scheme" in res.policy.reason
 
 
 def test_denied_ip_literal(gateway_b3):

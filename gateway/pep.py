@@ -116,7 +116,22 @@ class ToolGateway:
                 "ablation": ablation,
             }
 
-            decision = self.pdp.decide(pdp_input)
+            try:
+                decision = self.pdp.decide(pdp_input)
+            except Exception as e:
+                reason = f"pdp_unavailable:{type(e).__name__}"
+                res = ToolCallResult.denied(tool, reason)
+                self._audit(
+                    req,
+                    res,
+                    t0,
+                    extra={
+                        "contains_canary": contains_canary,
+                        "pdp_input": pdp_input,
+                        "pdp_error_type": type(e).__name__,
+                    },
+                )
+                return res
 
             if decision.allow:
                 result = tool_def.execute(parsed_args)

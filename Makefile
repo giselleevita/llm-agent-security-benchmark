@@ -1,13 +1,16 @@
 SCENARIOS=benchmark/scenarios/scenarios.yaml
 RUNS=5
 
-.PHONY: opa-up opa-down eval ablations report report-plots thesis-bundle sbom baseline-pre-upgrade
+.PHONY: opa-up opa-down test eval ablations report report-plots thesis-bundle sbom baseline-pre-upgrade
 
 opa-up:
 	docker compose up -d
 
 opa-down:
 	docker compose down -v
+
+test:
+	python -m pytest
 
 eval: opa-up
 	./scripts/run_eval_matrix.sh $(SCENARIOS) $(RUNS)
@@ -41,5 +44,5 @@ thesis-bundle: opa-up
 	. .venv/bin/activate && python scripts/report_results.py --results-dir results --scenarios $(SCENARIOS) --make-plots
 	. .venv/bin/activate && python scripts/generate_sbom.py artifacts/sbom.json
 	@mkdir -p artifacts
-	@zip -r artifacts/thesis.zip results docs requirements-lock.txt artifacts/sbom.json -x "*.DS_Store" >/dev/null
+	@zip -r artifacts/thesis.zip results docs README.md pyproject.toml artifacts/sbom.json -x "*.DS_Store" >/dev/null
 	@echo "thesis bundle ready: artifacts/thesis.zip"
