@@ -38,11 +38,9 @@ A benchmark harness evaluates multiple baselines and turns security regression c
 - Audit traces with correlation IDs.
 - CI security gate using benchmark thresholds.
 
-## What This Shows
+## Operational Value
 
-This is the strongest specialist project in the portfolio. For a general software role, it should be presented as secure runtime engineering, test automation, and policy-driven system design, not only as an AI research project.
-
-It shows that the portfolio has a differentiator while still demonstrating backend, testing, Docker, and CI skills.
+The benchmark turns agent-security controls into measurable release criteria. Teams can compare enforcement strategies, inspect policy decisions, and reject changes that increase attack success or data leakage.
 
 ## Next Improvements
 
