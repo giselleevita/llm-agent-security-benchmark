@@ -1,5 +1,12 @@
 # Secure Agent Runtime — Policy-Enforced Tool Use + Prompt-Injection Benchmark
 
+> **Archived predecessor.** This repository preserves the original research benchmark
+> and its historical B0-B3 results. Active development moved to
+> [Agent Security Gate](https://github.com/giselleevita/agent-security-gate), which
+> combines the maintained enforcement runtime with explicit baseline comparison,
+> per-attack-class reporting, signed evidence bundles, and production-oriented
+> integration tests.
+
 ![CI](https://github.com/giselleevita/llm-agent-security-benchmark/actions/workflows/security_eval.yml/badge.svg)
 ![Python](https://img.shields.io/badge/python-3.11%2B-blue)
 ![License](https://img.shields.io/badge/license-Apache--2.0-green)
